@@ -1,0 +1,62 @@
+{
+    "drug_name": "sacubitril-valsartan",
+    "side_effects": {
+        "Cardiovascular": {
+            "Very common": [
+                "hypotension "
+            ],
+            "Common": [
+                "orthostasis"
+            ]
+        },
+        "Metabolic": {
+            "Very common": [
+                "potassium greater than 5.5 meq/l ",
+                "hyperkalemia "
+            ]
+        },
+        "Renal": {
+            "Very common": [
+                "serum creatinine increased greater than 50% "
+            ],
+            "Common": [
+                "renal failure/acute renal failure"
+            ]
+        },
+        "Respiratory": {
+            "Common": [
+                "cough"
+            ]
+        },
+        "Nervous system": {
+            "Common": [
+                "dizziness"
+            ]
+        },
+        "Dermatologic": {
+            "Uncommon": [
+                "angioedema"
+            ],
+            "Postmarketing reports": [
+                "rash",
+                "pruritus"
+            ]
+        },
+        "Hematologic": {
+            "Common": [
+                "hemoglobin/hematocrit decreased greater than 20%"
+            ]
+        },
+        "Other": {
+            "Common": [
+                "falls"
+            ]
+        },
+        "Immunologic": {
+            "Postmarketing reports": [
+                "hypersensitivity",
+                "anaphylactic reaction"
+            ]
+        }
+    }
+}

@@ -1,0 +1,20 @@
+{
+    "B-prepare": 702,
+    "O": 20668,
+    "B-mechanism": 145,
+    "I-mechanism": 475,
+    "B-noun": 213,
+    "B-action": 208,
+    "I-action": 433,
+    "I-noun": 168,
+    "B-absorbtion": 22,
+    "I-absorbtion": 53,
+    "B-excretion": 63,
+    "B-metabol": 59,
+    "I-metabol": 53,
+    "B-hormone": 5,
+    "I-hormone": 2,
+    "B-prot_link": 16,
+    "I-prot_link": 31,
+    "I-prepare": 30
+}

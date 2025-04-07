@@ -1,10 +1,7 @@
 from django.conf import settings, Settings
-from django.contrib.auth.views import LoginView
 from django.http import HttpResponse, HttpResponseNotFound, Http404
 from django.http import JsonResponse
 from django.shortcuts import render, redirect
-from django.urls import reverse_lazy
-from django.views.generic import CreateView
 from django.views.generic.list import ListView
 from django.views.decorators.http import require_GET
 from django.db.models import Q
@@ -21,9 +18,14 @@ from .Fortran_to_Python_IPM import *
 from pharm_web.auxiliary_module.text_getter_drugs import TextGetterDrugs
 
 
-menu = [{'title': "Главная", 'url_name': 'home'},
-        {'title': "Добавить данные", 'url_name': 'add_page'},
-        ]
+def get_menu_for_user(user):
+    menu = [{'title': "Главная", 'url_name': 'home'}]
+    
+    if user.is_authenticated and user.is_staff:
+        menu.append({'title': "Добавить данные", 'url_name': 'add_page'})
+    
+    return menu
+
 
 add_menu = [{'name_model': "Добавить группу ЛС", 'pk': "1", 'url_name': 'add_DrugGroup'},
             {'name_model': "Добавить ЛС", 'pk': "1", 'url_name': 'add_Drug'},
@@ -38,7 +40,7 @@ def index_views(request):
     ml = ml_model.objects.filter(is_visible=True)
     context = {
         'ml_model': ml,
-        'menu': menu,
+        'menu': get_menu_for_user(request.user),
         'title': 'Главная страница',
         'ml_model_selected': 0,
         'main_element': 'Главная страница',
@@ -49,7 +51,7 @@ def index_views(request):
 def addpage_views(request):
     context = {
         'add_element': add_menu,
-        'menu': menu,
+        'menu': get_menu_for_user(request.user),
         'title': 'Добавить данные в БД',
         'add_element_selected': 0,
     }
@@ -68,7 +70,7 @@ def addDrugGroup_views(request):
     form = addDrugGroup(request)
     context = {
         'add_element': add_menu,
-        'menu': menu,
+        'menu': get_menu_for_user(request.user),
         'form': form,
         'title': 'Добавление новой группы ЛС',
         'add_element_selected': 0,
@@ -80,7 +82,7 @@ def addDrug_views(request):
     form = addDrug(request)
     context = {
         'add_element': add_menu,
-        'menu': menu,
+        'menu': get_menu_for_user(request.user),
         'form': form,
         'title': 'Добавление нового ЛС',
         'add_element_selected': 0,
@@ -93,7 +95,7 @@ def updateSideEffects_views(request):
     form_add_SideEffect_rande = UpdateSeideEffectRande(request, title_type_view_side_effects)
     context = {
         'add_element': add_menu,                        # боковое меню
-        'menu': menu, # Шапка сайта
+        'menu': get_menu_for_user(request.user), # Шапка сайта
 
         'form_check_type_view': form_check_type_view, # Форма для выбора способа отображения побочек
         "side_effects": side_effects,
@@ -114,7 +116,7 @@ def show_model_views(request, ml_model_slug):
     ml = ml_model.objects.filter(is_visible=True)
     context = {
         'ml_model': ml,
-        'menu': menu,
+        'menu': get_menu_for_user(request.user),
         'title': 'Главная страница',
         'main_element': 'show_model + ' + ml_model_slug,
     }
@@ -217,30 +219,3 @@ def finding_matches(request):
                          'ЛС из файла': txt_drug_names},
                         json_dumps_params={'ensure_ascii': False,
                                            'indent': 4})
-
-
-class RegisterUser(CreateView):
-    form_class = RegisterUserForm
-    template_name = 'pharm/register.html'
-    success_url = reverse_lazy('login')
-
-    def get_context_data(self, *, object_list=None, **kwargs):
-        context = super().get_context_data(**kwargs)
-        return dict(list(context.items()))
-
-
-class LoginUser(LoginView):
-    form_class = LoginUserForm
-    template_name = 'pharm/login.html'
-
-    def get_context_data(self, *, object_list=None, **kwargs):
-        context = super().get_context_data(**kwargs)
-        return dict(list(context.items()))
-
-    def get_success_url(self):
-        return reverse_lazy('home')
-
-
-def logout_user(request):
-    logout(request)
-    return redirect('login')

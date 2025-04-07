@@ -29,6 +29,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     # Включение шаблонов URL из приложения pharm_web
     path('', include('pharm_web.urls')),
+    path('accounts/', include('accounts.urls'))
 ]
 
 # Добавление шаблона URL для обслуживания медиафайлов во время разработки, если DEBUG установлен в True

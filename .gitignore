@@ -2,6 +2,7 @@
 .vscode
 __pycache__/
 *.pyc
+.cache/
 
 # Virtual enviroment
 .env
@@ -10,9 +11,40 @@ venv
 .venv
 
 # Archies
-.rar
-.zip
+*.rar
+*.zip
 
 # Data bases
 *.db
 *.sqlite3
+dedoc_venv
+
+
+# Files
+*.pdf
+*.json
+
+# Directories
+Инструкции_ГРЛС_сканы_1/
+Инструкции_ГРЛС_сканы_2/
+
+
+# models
+*.pt
+*.onnx
+*.pb
+*.ckpt
+*.bin
+*.pkl
+
+dedoc_model/
+models/
+weights/
+checkpoints/
+
+**/dedoc/**/models/
+**/dedoc/**/ocr/**
+
+# cache
+*.log
+*.tmp

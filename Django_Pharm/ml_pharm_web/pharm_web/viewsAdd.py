@@ -2,10 +2,12 @@ import re
 from itertools import chain
 
 from django.shortcuts import redirect
+from django.contrib.admin.views.decorators import staff_member_required
 
 from pharm_web.forms import *
 
 
+@staff_member_required
 def addDrugGroup(request):
     if request.method == 'POST':
         form = AddDrugGroupForm(request.POST)
@@ -22,6 +24,7 @@ def addDrugGroup(request):
     return form
 
 
+#@staff_member_required
 # def addDrug(request):
 #     if request.method == 'POST':
 #         form = AddDrugForm(request.POST)
@@ -37,6 +40,7 @@ def addDrugGroup(request):
 #     return form
 
 
+@staff_member_required
 def addDrug(request):
     path_drugs = '..\\ml_pharm_web\\txt_files_db\\drugs_xcn.txt'
     path_rangs = '..\\ml_pharm_web\\txt_files_db\\rangs.txt'
@@ -247,7 +251,7 @@ def CheckSideEffectsView(request):
 #     return form
 
 
-
+@staff_member_required
 def AddNewSideEffect(request):
     path_side_effects = '..\\ml_pharm_web\\txt_files_db\\side_effects.txt'
     path_drugs = '..\\ml_pharm_web\\txt_files_db\\drugs_xcn.txt'
@@ -314,6 +318,7 @@ def AddNewSideEffect(request):
     return form
 
 
+# @staff_member_required
 # def UpdateSeideEffectRande(request, drug_id):
 #     path_side_effect = '..\\ml_pharm_web\\txt_files_db\\side_effects.txt'
 #     path_rang = '..\\ml_pharm_web\\txt_files_db\\rangs.txt'
@@ -378,6 +383,7 @@ def AddNewSideEffect(request):
 #     return form
 
 
+@staff_member_required
 def UpdateSeideEffectRande(request, drug_id):
     path_side_effect = '..\\ml_pharm_web\\txt_files_db\\side_effects.txt'
     path_rang = '..\\ml_pharm_web\\txt_files_db\\rangs.txt'

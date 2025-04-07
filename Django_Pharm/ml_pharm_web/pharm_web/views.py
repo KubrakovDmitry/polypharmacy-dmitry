@@ -1,9 +1,8 @@
-from django.conf import settings, Settings
-from django.http import HttpResponse, HttpResponseNotFound, Http404
+from django.conf import settings
 from django.http import JsonResponse
-from django.shortcuts import render, redirect
-from django.views.generic.list import ListView
+from django.shortcuts import render
 from django.views.decorators.http import require_GET
+from django.contrib.admin.views.decorators import staff_member_required
 from django.db.models import Q
 
 from .all_drug_table_views import all_drug_table
@@ -48,6 +47,7 @@ def index_views(request):
     return render(request, 'pharm/index.html', context=context)
 
 
+@staff_member_required
 def addpage_views(request):
     context = {
         'add_element': add_menu,
@@ -66,6 +66,7 @@ def aboutpage_views(request):
 
 
 
+@staff_member_required
 def addDrugGroup_views(request):
     form = addDrugGroup(request)
     context = {
@@ -78,6 +79,7 @@ def addDrugGroup_views(request):
     return render(request, 'pharm/addDrugGroup.html', context=context)
 
 
+@staff_member_required
 def addDrug_views(request):
     form = addDrug(request)
     context = {
@@ -89,6 +91,8 @@ def addDrug_views(request):
     }
     return render(request, 'pharm/addDrugGroup.html', context=context)
 
+
+@staff_member_required
 def updateSideEffects_views(request):
     tipe_view, title_type_view_side_effects, side_effects, form_check_type_view,  = CheckSideEffectsView(request)
     form_add_SideEffect = AddNewSideEffect(request)
@@ -177,6 +181,7 @@ def search_drugs(request):
     # Возвращаем список в формате JSON
     return JsonResponse({'drugs': drugs})
 
+
 @require_GET
 def search_polipharma_drugs(request):
     # Получаем значение из параметра "q" в запросе
@@ -197,7 +202,6 @@ def search_polipharma_drugs(request):
         drugs.append({'index': drug_el.index, 'name': drug_el.name})
     # Возвращаем список в формате JSON
     return JsonResponse({'drugs': drugs})
-
 
 
 def finding_matches(request):

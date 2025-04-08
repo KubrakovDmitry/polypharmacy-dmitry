@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'pharm_web.apps.PharmWebConfig',
     'django.contrib.postgres', #это модуль Django, который предоставляет интеграцию с базой данных PostgreSQL
     'accounts',
+    'drugs',
 ]
 
 MIDDLEWARE = [

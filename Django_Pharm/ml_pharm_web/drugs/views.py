@@ -1,8 +1,11 @@
+import re
+
 from django.shortcuts import render, redirect
 from django.contrib.admin.views.decorators import staff_member_required
 from django.urls import reverse
 
-from .forms import AddDrugForm, AddDrugGroupForm, AddSideEffect, UpdateSideEffectProbabilityForm
+from .forms import *
+from .models import *
 from . import services
 
 add_menu = [
@@ -23,7 +26,7 @@ def addpage_views(request):
 
 
 @staff_member_required
-def addDrug_views(request):
+def add_drug_views(request):
     if request.method == 'POST':
         form = AddDrugForm(request.POST)
         if form.is_valid():
@@ -46,7 +49,7 @@ def addDrug_views(request):
 
 
 @staff_member_required
-def addDrugGroup_views(request):
+def add_drugGroup_views(request):
     if request.method == 'POST':
         form = AddDrugGroupForm(request.POST)
         if form.is_valid():
@@ -70,33 +73,119 @@ def addDrugGroup_views(request):
 
 @staff_member_required
 def updateSideEffects_views(request):
-    form_type = request.POST.get('form_type') if request.method == 'POST' else None
-
     tipe_view, data_obj, side_effects, form_check = services.get_side_effects_view(request)
-
-    form_add = AddSideEffect()
-    form_update = UpdateSideEffectProbabilityForm()
-
-    if form_type == 'add_se':
-        form_add = services.handle_add_side_effect(request)
-        tipe_view, data_obj, side_effects, form_check = services.get_side_effects_view(request)
-
-    elif form_type == 'update_prob' and tipe_view == 'drug' and data_obj:
-        form_update = services.handle_update_side_effect_probability(request, data_obj.id)
-        tipe_view, data_obj, side_effects, form_check = services.get_side_effects_view(request)
-
-    title = data_obj.name if tipe_view == 'drug' and data_obj else "Побочные эффекты"
-
+    
     context = {
         'form_check_type_view': form_check,
         'side_effects': side_effects,
-        'title_type_view_side_effects': title,
+        'title_type_view_side_effects': data_obj.name if tipe_view == 'drug' and data_obj else "Побочные эффекты",
         'tipe_view': tipe_view,
-        'form_add_SideEffect': form_add,
-        'form_add_SideEffect_rande': form_update,
+        'form_add_SideEffect': AddSideEffect(), 
+        'form_add_SideEffect_rande': UpdateSideEffectProbabilityForm(),  
         'title': 'Изменить побочки',
         'add_element': add_menu,
         'add_element_selected': 0,
     }
+    
+    return render(request, 'drugs/updateSideEffects.html', context)
 
+
+@staff_member_required
+def list_side_effects_view(request):
+    form_check_type_view = DisplaySideEffectsForm(request.POST or None)
+    tipe_view = None
+    data_obj = None
+    side_effects = None
+
+    if request.method == 'POST' and form_check_type_view.is_valid():
+        display_method = form_check_type_view.cleaned_data['display_method']
+        if display_method == 'all':
+            tipe_view = "all"
+            side_effects = SideEffect.objects.all()
+        else:
+            try:
+                drug = Drug.objects.get(id=display_method)
+                tipe_view = "drug"
+                data_obj = drug
+                side_effects = DrugSideEffect.objects.filter(drug=drug).select_related('side_effect')
+            except Drug.DoesNotExist:
+                form_check_type_view.add_error(None, "Лекарство не найдено")
+
+    context = {
+        'form_check_type_view': form_check_type_view,
+        'tipe_view': tipe_view,
+        'data_obj': data_obj,
+        'side_effects': side_effects,
+        'form_add_SideEffect': AddSideEffect(),  
+        'form_add_SideEffect_rande': UpdateSideEffectProbabilityForm(), 
+        'title': 'Побочные эффекты',
+        'title_type_view_side_effects': "Побочные эффекты" if tipe_view == "all" else data_obj.name if data_obj else "",
+    }
+    
+    return render(request, 'drugs/updateSideEffects.html', context)
+
+
+@staff_member_required
+def add_side_effect_view(request):
+    if request.method == 'POST':
+        form = AddSideEffect(request.POST)
+        if form.is_valid():
+            name = form.cleaned_data.get('name')
+            if not re.search(r'[a-zA-Zа-яА-Я]', name):
+                form.add_error("name", "Некорректное название побочного эффекта")
+            else:
+                new_se = SideEffect.objects.create(name=name)
+                for drug in Drug.objects.all():
+                    DrugSideEffect.objects.create(drug=drug, side_effect=new_se, probability=0.0)
+                return redirect('side_effects_list')
+    else:
+        form = AddSideEffect()
+
+    context = {
+        'form_check_type_view': DisplaySideEffectsForm(),
+        'tipe_view': 'all',
+        'data_obj': None,
+        'side_effects': SideEffect.objects.all(),
+        'form_add_SideEffect': form,
+        'form_add_SideEffect_rande': UpdateSideEffectProbabilityForm(),
+        'title': 'Побочные эффекты',
+        'title_type_view_side_effects': "Побочные эффекты",
+    }
+
+    return render(request, 'drugs/updateSideEffects.html', context)
+
+
+@staff_member_required
+def update_side_effect_view(request, drug_id):
+    try:
+        drug = Drug.objects.get(id=drug_id)
+        side_effects_qs = DrugSideEffect.objects.filter(drug=drug).select_related('side_effect')
+    except Drug.DoesNotExist:
+        return redirect('side_effects_list')
+
+    if request.method == 'POST':
+        form = UpdateSideEffectProbabilityForm(request.POST)
+        if form.is_valid():
+            side_effect_id = form.cleaned_data.get('side_effect')
+            probability = form.cleaned_data.get('probability')
+            try:
+                dse = DrugSideEffect.objects.get(drug=drug, side_effect_id=side_effect_id)
+                dse.probability = probability
+                dse.save()
+                return redirect('side_effects_update', drug_id=drug.id)
+            except DrugSideEffect.DoesNotExist:
+                form.add_error(None, "Побочный эффект не найден")
+    else:
+        form = UpdateSideEffectProbabilityForm()
+
+    context = {
+        'form_check_type_view': DisplaySideEffectsForm(initial={'display_method': str(drug.id)}),
+        'tipe_view': 'drug',
+        'data_obj': drug,
+        'side_effects': side_effects_qs,
+        'form_add_SideEffect': AddSideEffect(),
+        'form_add_SideEffect_rande': form,
+        'title': 'Побочные эффекты',
+        'title_type_view_side_effects': drug.name,
+    }
     return render(request, 'drugs/updateSideEffects.html', context)

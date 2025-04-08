@@ -3,9 +3,8 @@
 {% block content %}
     <h1>{{ title }}</h1>
 
-    <form method="post">
+    <form method="post" action="{% url 'side_effects_list' %}">
         {% csrf_token %}
-        <input type="hidden" name="form_type" value="view_type">
         {{ form_check_type_view.as_p }}
         <button type="submit" class="btn">Отобразить</button>
     </form>
@@ -15,9 +14,8 @@
     {% if tipe_view == 'all' %}
         <br/>
         <h2>Добавить побочку</h2>
-        <form method="post">
+        <form method="post" action="{% url 'side_effects_add' %}">
             {% csrf_token %}
-            <input type="hidden" name="form_type" value="add_se">
             <div class="form-error">{{ form_add_SideEffect.non_field_errors }}</div>
             {{ form_add_SideEffect.as_p }}
             <button type="submit" class="btn">Добавить</button>
@@ -32,17 +30,16 @@
         {% if tipe_view == 'all' %}
             <ul>
                 {% for se in side_effects %}
-                <li>{{ se.name }}</li>
+                    <li>{{ se.name }}</li>
                 {% endfor %}
             </ul>
         {% endif %}
 
-        {% if tipe_view == 'drug' %}
+        {% if tipe_view == 'drug' and data_obj %}
             <br/>
-            <h2>Изменить коэффициент побочки</h2>
-            <form method="post">
+            <h2>Изменить коэффициент побочки для препарата {{ data_obj.name }}</h2>
+            <form method="post" action="{% url 'side_effects_update' data_obj.id %}">
                 {% csrf_token %}
-                <input type="hidden" name="form_type" value="update_prob">
                 {{ form_add_SideEffect_rande.as_p }}
                 <button type="submit" class="btn">Изменить</button>
             </form>
@@ -58,11 +55,11 @@
                 </thead>
                 <tbody>
                     {% for se in side_effects %}
-                    <tr>
-                        <th>{{ forloop.counter }}</th>
-                        <td>{{ se.side_effect.name }}</td>
-                        <td>{{ se.probability }}</td>
-                    </tr>
+                        <tr>
+                            <th>{{ forloop.counter }}</th>
+                            <td>{{ se.side_effect.name }}</td>
+                            <td>{{ se.probability }}</td>
+                        </tr>
                     {% endfor %}
                 </tbody>
             </table>

@@ -1,9 +1,5 @@
-import os
-
 from django import forms
-from django.conf import settings
-
-from .models import Drug, DrugGroup
+from .models import Drug, DrugGroup, SideEffect
 
 
 class AddDrugGroupForm(forms.ModelForm):
@@ -18,58 +14,32 @@ class AddDrugForm(forms.ModelForm):
         fields = '__all__'
 
 
-class AddSideEffect(forms.Form):
-    name = forms.CharField(label='Название побочного эффекта', widget=forms.TextInput(attrs={'class': 'form-input'}))
+class DisplaySideEffectsForm(forms.Form):
+    display_method = forms.ChoiceField(label="Выберите способ отображения побочек")
+
+    def __init__(self, *args, **kwargs):
+        super(DisplaySideEffectsForm, self).__init__(*args, **kwargs)
+        choices = [('all', 'Показать всё')]
+        drugs = Drug.objects.all()
+        choices += [(str(drug.id), drug.name) for drug in drugs]
+        self.fields['display_method'].choices = choices
 
 
-class updateSeideEffectRande(forms.Form):
-    # DISPLAY_CHOICES = [ # Нужно получить список побочек
-    #     ('1', 'Гипатит'),
-    #     ('2', 'Почечная недостаточность'),
-    # ]
-    DISPLAY_CHOICES = []
-    filename = 'side_effects.txt'
-    path = os.path.join(settings.TXT_DB_PATH, filename)
-
-    with open(path, 'r', encoding='utf-8') as file:
-        for line in file:
-            if line == '\n':
-                continue
-            line = line.strip()
-            print('line =', line)
-            DISPLAY_CHOICES.append(
-                (line.split('\t')[0],
-                 line.split('\t')[1].replace(';', ''))
-            )
-
-    display_method = forms.ChoiceField(
-        choices=DISPLAY_CHOICES,
-        label="Выберете побочный эффект",
-        widget=forms.Select
+class UpdateSideEffectProbabilityForm(forms.Form):
+    side_effect = forms.ChoiceField(label="Выберите побочный эффект")
+    probability = forms.FloatField(
+        label="Коэффициент появления",
+        widget=forms.NumberInput(attrs={'class': 'form-input'})
     )
 
-    name = forms.CharField(label='Коэффициент появления', widget=forms.TextInput(attrs={'class': 'form-input'}))
+    def __init__(self, *args, **kwargs):
+        super(UpdateSideEffectProbabilityForm, self).__init__(*args, **kwargs)
+        choices = [(str(se.id), se.name) for se in SideEffect.objects.all()]
+        self.fields['side_effect'].choices = choices
 
 
-class DisplaySideEffectsForm(forms.Form):
-
-    DISPLAY_CHOICES = []
-    DISPLAY_CHOICES.append(('all', 'Показать всё'))
-
-    filename = 'drugs_xcn.txt'
-    path = os.path.join(settings.TXT_DB_PATH, filename)
-
-    with open(path, 'r', encoding='utf-8') as file:
-        for line in file:
-            line = line.strip()
-            drug_name = line.split('\t')[1].replace(';', '')
-            drug_id = line.split('\t')[0]
-            DISPLAY_CHOICES.append(
-                (drug_id,
-                 drug_name))
-
-    display_method = forms.ChoiceField(
-        choices=DISPLAY_CHOICES,
-        label="Выберете способ отображения побочек",
-        widget=forms.Select
+class AddSideEffect(forms.Form):
+    name = forms.CharField(
+        label='Название побочного эффекта',
+        widget=forms.TextInput(attrs={'class': 'form-input'})
     )

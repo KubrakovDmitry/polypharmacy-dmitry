@@ -2,9 +2,8 @@ from django.shortcuts import render, redirect
 from django.contrib.admin.views.decorators import staff_member_required
 from django.urls import reverse
 
-from .forms import AddDrugForm, AddDrugGroupForm
+from .forms import AddDrugForm, AddDrugGroupForm, AddSideEffect, UpdateSideEffectProbabilityForm
 from . import services
-
 
 add_menu = [
     {'name_model': "Добавить группу ЛС", 'pk': "1", 'url_name': 'add_DrugGroup'},
@@ -29,7 +28,7 @@ def addDrug_views(request):
         form = AddDrugForm(request.POST)
         if form.is_valid():
             try:
-                services.handle_add_drug(form.cleaned_data['name'])
+                services.handle_add_drug(form.cleaned_data)
                 return redirect('home')
             except Exception as e:
                 form.add_error(None, f'Ошибка добавления ЛС: {e}')
@@ -43,7 +42,6 @@ def addDrug_views(request):
         'add_element_selected': 0,
         'form_action': reverse('add_Drug'),
     }
-
     return render(request, 'drugs/addDrugGroup.html', context=context)
 
 
@@ -67,15 +65,27 @@ def addDrugGroup_views(request):
         'add_element_selected': 0,
         'form_action': reverse('add_DrugGroup'),
     }
-
     return render(request, 'drugs/addDrugGroup.html', context=context)
 
 
 @staff_member_required
 def updateSideEffects_views(request):
-    tipe_view, title, side_effects, form_check = services.get_side_effects_view(request)
-    form_add = services.get_add_side_effect_form(request)
-    form_update = services.get_update_side_effect_form(request, title)
+    form_type = request.POST.get('form_type') if request.method == 'POST' else None
+
+    tipe_view, data_obj, side_effects, form_check = services.get_side_effects_view(request)
+
+    form_add = AddSideEffect()
+    form_update = UpdateSideEffectProbabilityForm()
+
+    if form_type == 'add_se':
+        form_add = services.handle_add_side_effect(request)
+        tipe_view, data_obj, side_effects, form_check = services.get_side_effects_view(request)
+
+    elif form_type == 'update_prob' and tipe_view == 'drug' and data_obj:
+        form_update = services.handle_update_side_effect_probability(request, data_obj.id)
+        tipe_view, data_obj, side_effects, form_check = services.get_side_effects_view(request)
+
+    title = data_obj.name if tipe_view == 'drug' and data_obj else "Побочные эффекты"
 
     context = {
         'form_check_type_view': form_check,
@@ -89,4 +99,4 @@ def updateSideEffects_views(request):
         'add_element_selected': 0,
     }
 
-    return render(request, 'drugs/updateSideEffects.html', context=context)
+    return render(request, 'drugs/updateSideEffects.html', context)

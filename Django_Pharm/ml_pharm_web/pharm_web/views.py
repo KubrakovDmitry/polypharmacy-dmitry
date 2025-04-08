@@ -2,7 +2,6 @@ from django.conf import settings
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.views.decorators.http import require_GET
-from django.contrib.admin.views.decorators import staff_member_required
 from django.db.models import Q
 
 from .all_drug_table_views import all_drug_table
@@ -14,6 +13,7 @@ from .forms import *
 from .models import *
 from .viewsAdd import *
 from .Fortran_to_Python_IPM import *
+from drugs.models import Drug
 from pharm_web.auxiliary_module.text_getter_drugs import TextGetterDrugs
 
 
@@ -25,11 +25,6 @@ def get_menu_for_user(user):
     
     return menu
 
-
-add_menu = [{'name_model': "Добавить группу ЛС", 'pk': "1", 'url_name': 'add_DrugGroup'},
-            {'name_model': "Добавить ЛС", 'pk': "1", 'url_name': 'add_Drug'},
-            {'name_model': "Изменить побочки", 'pk': "1", 'url_name': 'update_SideEffects'},
-            ]
 
 DRUGS_PATH = 'txt_files_db\\drugs_xcn.txt'
 

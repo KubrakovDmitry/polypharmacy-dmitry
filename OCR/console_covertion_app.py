@@ -34,7 +34,6 @@ class ScanConverter:
             self.input_path = Path(sys.argv[self.INPUT_PATH])
 
             if len(sys.argv) == 3:
-                print('Есть второй аргумент!')
                 self.output_path = Path(sys.argv[self.OUTPUT_PATH])
             else:
                 self.output_path = self.input_path.with_suffix('.json')
